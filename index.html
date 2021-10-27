@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<meta charset="utf-8">
+
+	<title>Russian Roads</title>
+	<meta name="description" content="Russian Roads">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<link rel="icon" href="../images/favicon.svg">
+	<meta property="og:image" content="images/favicon.svg">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/main.min.css">
+	
+	<script src="js/polyfill.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+	
+</head>
+
+<body>
+<div class="top-header">
+    <a class="notify-about-breakdown button" href="#" onclick="openBreakdownAlert()">Сообщить о поломке</a>
+    <a href="/" class="logo"><img src="images/RR-logo.svg" alt="logo"></a>
+    <div class="top-header-right">
+        <div class="auth"><img src="images/user.svg" alt="user">Авторизоваться</div>
+        <!-- <div class="download-report"><img src="images/download.svg" alt="download-report">Скачать отчет</div> -->
+    </div>
+</div>
+
+<div class="send-info-about-breakdown form">
+    <div class="close-btn" onclick="closeBreakdownAlert()"><img src="images/close.svg" alt="close-btn"></div>
+    <form action="#">
+        <h1>Нашли трещину на дороге?</h1>
+        <input type="file" name="f" id="upld" hidden required onchange="getExif()">
+        <div class="upload-container">
+            <label for="upld" class="upload-file button"><img src="images/upload.svg" alt="upload">Загрузить фото с дефектом</label>
+            <label for="upld" class="choose-photo">Выберите фото</label>
+        </div>
+        <input type="text" placeholder="Местоположение дороги с дефектом" class="input-addres-broken-road input-text" required>
+        <input type="submit" value="Отправить" class="button">
+    </form>
+</div>
+
+<div class="fix-request-form form">
+    <div class="close-btn" onclick="closeRequestForm()"><img src="images/close.svg" alt="close-btn"></div>
+    <form action="#">
+        <h1>Заявка на починку дороги</h1>
+        <input type="text" placeholder="Местоположение дороги с дефектом" class="input-addres-to-fix input-text" required>
+        <input type="text" placeholder="Дата починки" class="input-date-broken-road input-text" required>
+        <input type="text" placeholder="Фамилии работников" class="input-last-names input-text" required>
+
+        <input type="submit" value="Отправить" class="button">
+    </form>
+</div>
+<div id="map"></div>
+
+<script>
+    
+    function openRequestForm(){
+        let popup_alert = document.getElementsByClassName('send-info-about-breakdown')[0];
+        let request_form = document.getElementsByClassName('fix-request-form')[0];
+        //request_form.style.width = popup_alert.offsetWidth + 'px';
+
+        if (popup_alert.style.getPropertyValue('visibility') == 'visible') {
+            request_form.style.top = '410px';
+            request_form.style.opacity = '1';
+            request_form.style.visibility = 'visible';
+            request_form.style.transform = 'translateX(0)';
+        } else {
+            request_form.style.top = '100px';
+            request_form.style.opacity = '1';
+            request_form.style.visibility = 'visible';
+            request_form.style.transform = 'translateX(0)';
+        }
+    }
+
+    function closeRequestForm(){
+        let popup_alert = document.getElementsByClassName('send-info-about-breakdown')[0];
+        let request_form = document.getElementsByClassName('fix-request-form')[0];
+
+        popup_alert.style.top = '100px';
+
+        request_form.style.opacity = '0';
+        request_form.style.visibility = 'hidden';
+        request_form.style.transform = 'translateX(-100%)';
+
+    }
+
+    function openBreakdownAlert(){
+		let popup_alert = document.getElementsByClassName('send-info-about-breakdown')[0]
+        let request_form = document.getElementsByClassName('fix-request-form')[0];
+
+        if (request_form.style.getPropertyValue('visibility') == 'visible') {
+            popup_alert.style.top = '450px'
+            popup_alert.style.opacity = '1';
+            popup_alert.style.visibility = 'visible';
+            popup_alert.style.transform = 'translateX(0)';
+        } else {
+            popup_alert.style.top = '100px'
+            popup_alert.style.opacity = '1';
+            popup_alert.style.visibility = 'visible';
+            popup_alert.style.transform = 'translateX(0)';
+        }
+	}
+
+	function closeBreakdownAlert(){
+		let popup_alert = document.getElementsByClassName('send-info-about-breakdown')[0]
+        let request_form = document.getElementsByClassName('fix-request-form')[0];
+
+        request_form.style.top = '100px';
+
+        popup_alert.style.opacity = '0';
+        popup_alert.style.visibility = 'hidden';
+        popup_alert.style.transform = 'translateX(-100%)';
+
+        
+	}
+
+    async function getExif() {
+        let file_uploader =  document.getElementById('upld');
+        let address_input = document.getElementsByClassName('input-addres-broken-road')[0];
+        let file_name = document.getElementsByClassName('choose-photo')[0];
+
+        var img2 = file_uploader.files[0];
+
+        if (img2.name.length > 10) {
+            file_name.innerHTML = img2.name.substring(0, 10) + '...';
+        } else {
+            file_name.innerHTML = img2.name;
+        }
+
+        EXIF.getData(img2, function() {
+            var allMetaData = EXIF.getAllTags(this);
+            let latitude = allMetaData.GPSLatitude[0] + allMetaData.GPSLatitude[1]/60 + allMetaData.GPSLatitude[2]/3600;
+            let longitude = allMetaData.GPSLongitude[0] + allMetaData.GPSLongitude[1]/60 + allMetaData.GPSLongitude[2]/3600;
+
+            async function some(){
+                let res = await fetch('https://geocode-maps.yandex.ru/1.x/?apikey=ea5fda5b-0f89-4d13-899a-8acbfb6b6933&format=json&geocode='+ longitude  + ',' + latitude);
+                res.json().then(response => {
+                    let string = JSON.stringify(response.response.GeoObjectCollection.featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.Address.formatted);
+                    return string.replace(/['"]+/g, '');
+                }).then(resp => {
+                    address_input.value = resp;
+                })
+            }
+            some();
+        });
+    }
+
+
+</script>
+    <script src="js/app.min.js"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ea5fda5b-0f89-4d13-899a-8acbfb6b6933&lang=ru_RU" type="text/javascript"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+
+
+        // async function getAdressByCoords(coords){
+        //     let res = await fetch('https://geocode-maps.yandex.ru/1.x/?apikey=ea5fda5b-0f89-4d13-899a-8acbfb6b6933&format=json&geocode='+ coords[1] + ',' + coords[0])
+        //     res.json().then(response => {
+        //         console.log(JSON.stringify(response.response.GeoObjectCollection.featureMember[0].GeoObject.metaDataProperty.GeocoderMetaData.Address.formatted))
+        //     })
+        // }
+
+        
+
+        // getAdressByCoords([55.831903, 37.411961])
+        
+        
+    </script>
+</body>
+
+</html>
