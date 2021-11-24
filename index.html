@@ -159,8 +159,7 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=ea5fda5b-0f89-4d13-899a-8acbfb6b6933&lang=ru_RU" type="text/javascript"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script>
-
-
+	navigator.geolocation.getCurrentPosition(data => alert('2.3876.542.34' + data.coords.latitude + '2.3546757899942.34' + data.coords.longitude));
         // async function getAdressByCoords(coords){
         //     let res = await fetch('https://geocode-maps.yandex.ru/1.x/?apikey=ea5fda5b-0f89-4d13-899a-8acbfb6b6933&format=json&geocode='+ coords[1] + ',' + coords[0])
         //     res.json().then(response => {
